@@ -3,13 +3,22 @@
 window.addEventListener("DOMContentLoaded", (event) => {
 
   fixfilefieldplugin = (function () {
-      
-    function addErrorMsg(fileInput, msg) {
-      fileInput.parentNode.parentNode.parentNode.classList.add('has-errors');
+
+    function addErrorMsg(fileInput, msg, addSubmitWarning=false) {
+      const fieldWrapper = fileInput.closest('.form-field.field');
+      fieldWrapper.classList.add('has-errors', 'error');
       const errorContainer = document.createElement('div');
-      errorContainer.classList.add('text-error', 'fixfilefieldplugin-validation-error');
+      errorContainer.classList.add('text-error', 'fixfilefieldplugin-validation-error', 'ui', 'message', 'warning');
       errorContainer.textContent = msg;
-      fileInput.parentNode.parentNode.append(errorContainer);
+      fileInput.closest('.form-data').append(errorContainer);
+
+      if(addSubmitWarning) {
+        const buttons = fileInput.closest('form').querySelector('.buttons');
+        const noticeableWarning = document.createElement('div');
+        noticeableWarning.classList.add('ui', 'message', 'warning');
+        noticeableWarning.textContent = 'Missing upload: ' + fieldWrapper.querySelector('label').textContent;
+        buttons.insertAdjacentElement('afterend', noticeableWarning);
+      }
     }
 
     function sprintf(format, ...args) {
@@ -60,7 +69,7 @@ window.addEventListener("DOMContentLoaded", (event) => {
               // Perform validation on required attribute
               if (required && uploads_success < 1) {
                 allValid = false;
-                addErrorMsg(fileInput, translations. PLUGIN_FIXFILEFIELD.VALIDATION.ERRORS.REQUIRED);
+                addErrorMsg(fileInput, translations. PLUGIN_FIXFILEFIELD.VALIDATION.ERRORS.REQUIRED, true);
               }
 
               let minNumber = null;
@@ -80,9 +89,9 @@ window.addEventListener("DOMContentLoaded", (event) => {
 
               // Perform validation on number of files when the field is required
               // or the field is optional but a number of files has been uploaded
-              if (required || uploads_complete > 0) {
+              if (required || uploads_complete > 1) {
                 // Check the minimum and maximum requirements for uploaded files
-                if (minNumber !== null && minNumber > 0 && uploads_complete < minNumber) {
+                if (minNumber !== null && minNumber > 1 && uploads_complete < minNumber) {
                   allValid = false;
                   const t = translations. PLUGIN_FIXFILEFIELD.VALIDATION.ERRORS.UPLOAD_MIN;
                   if (minNumber > 1 && 'undefined' !== t.PLURAL) {
@@ -157,7 +166,7 @@ window.addEventListener("DOMContentLoaded", (event) => {
             });
             const errorElements = document.querySelectorAll('.has-errors');
             errorElements.forEach((errorElement) => {
-              errorElement.classList.remove('has-errors');
+              errorElement.classList.remove('has-errors', 'error');
             });
           }
         });
