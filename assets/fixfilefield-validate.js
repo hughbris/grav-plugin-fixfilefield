@@ -8,7 +8,7 @@ window.addEventListener("DOMContentLoaded", (event) => {
       const fieldWrapper = fileInput.closest('.form-field.field');
       fieldWrapper.classList.add('has-errors', 'error');
       const errorContainer = document.createElement('div');
-      errorContainer.classList.add('text-error', 'fixfilefieldplugin-validation-error', 'ui', 'message', 'warning');
+      errorContainer.classList.add('text-error', 'fixfilefieldplugin-validation-error', 'ui', 'message', 'error');
       errorContainer.textContent = msg;
       fileInput.closest('.form-data').append(errorContainer);
 
@@ -19,6 +19,23 @@ window.addEventListener("DOMContentLoaded", (event) => {
         noticeableWarning.textContent = 'Missing upload: ' + fieldWrapper.querySelector('label').textContent;
         buttons.insertAdjacentElement('afterend', noticeableWarning);
       }
+    }
+
+    function clearFieldErrorMessages(fileInput) {
+      const fieldWrapper = fileInput.closest('.form-field.field');
+      fieldWrapper.classList.remove('has-errors', 'error');
+      fileInput
+        .closest('.form-data')
+        .querySelectorAll('.text-error.fixfilefieldplugin-validation-error.ui.message.error')
+        .forEach( (el) => {
+          el.remove();
+          });
+    }
+
+    function clearSubmitWarnings(form) {
+      form.querySelectorAll('.buttons ~ .ui.message.warning').forEach( (el) => {
+        el.remove();
+        });
     }
 
     function sprintf(format, ...args) {
@@ -52,12 +69,15 @@ window.addEventListener("DOMContentLoaded", (event) => {
           if (clickedElement.matches('input[type="submit"], button[type="submit"]')) {
             // Submit button clicked
             console.log('Submit button clicked');
+            clearSubmitWarnings(form);
 
             const fileInputs = form.querySelectorAll('input[type="file"]');
             let allValid = true;
 
             // Process each set of file fields separately
             fileInputs.forEach(function (fileInput) {
+              clearFieldErrorMessages(fileInput);
+
               // Get the attributes from each form file field
               const required = fileInput.hasAttribute("data-required");
               
